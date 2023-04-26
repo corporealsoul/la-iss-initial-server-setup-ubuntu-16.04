@@ -49,29 +49,42 @@
 
 ### Configure static IP,
 
-`anup@ubuntu-16047:~$ sudo nano /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg`
+`anup@ubuntu-16047:~$ clear && echo $(ip -o -4 route get 8.8.8.8 | sed -nr 's/.*dev ([^\ ]+).*/\1/p')`
 
-    network: {config: disabled}
+`anup@ubuntu-16047:~$ ls -ltr /etc/network/`
+
+`anup@ubuntu-16047:~$ sudo cp /etc/network/interfaces /etc/network/interfaces.backup`
+
+`anup@ubuntu-16047:~$ sudo nano /etc/network/interfaces`
 
 
-`anup@ubuntu-16047:~$ sudo cp /etc/netplan/00-installer-config.yaml /etc/netplan/00-installer-config.yaml.backup`
+    # This file describes the network interfaces available on your system
+    
+    # and how to activate them. For more information, see interfaces(5).
+    source /etc/network/interfaces.d/*
+    
+    # This file describes the network interfaces available on your system
+    
+    # and how to activate them. For more information, see interfaces(5).
+    source /etc/network/interfaces.d/*
+    
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
+    
+    # The primary network interface
+    auto enp0s8
+    iface enp0s8 inet static
+        address 192.168.56.101
+        netmask 255.255.255.0
+        network 192.168.56.0
+        broadcast 192.168.56.255
+        gateway 192.168.56.1
+    
+        # dns-* options are implemented by the resolvconf package, if installed
+        dns-nameservers 4.4.4.4 8.8.4.4
 
-`anup@ubuntu-16047:~$ sudo nano /etc/netplan/00-installer-config.yaml`
-
-    # This is the network config written by 'subiquity'
-    network:
-      version: 2
-      renderer: networkd
-      ethernets:
-        enp0s3:
-          dhcp4: yes
-        enp0s8:
-          addresses: [192.168.56.10/24]
-          dhcp4: false
-
-`anup@ubuntu-16047:~$ sudo netplan try`
-
-`anup@ubuntu-16047:~$ sudo netplan apply`
+`anup@ubuntu-16047:~$ sudo systemctl restart networking.service`
 
 <br>
 
